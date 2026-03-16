@@ -12,7 +12,6 @@ coverage/
 
 # Env
 .env
-.env.*
 
 # IDE
 .vscode/
