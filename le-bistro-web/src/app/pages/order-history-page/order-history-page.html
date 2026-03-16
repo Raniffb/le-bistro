@@ -1,0 +1,172 @@
+<div class="order-history-page">
+  <header class="page-header">
+    <app-back-button></app-back-button>
+
+    <div class="page-title">
+      <h1>Histórico de pedidos</h1>
+      <p>Filtre pedidos e selecione um deles para visualizar os detalhes e o histórico</p>
+    </div>
+  </header>
+
+  <section class="filters-card">
+    <div class="filters-grid">
+      <div class="field">
+        <label for="status">Status</label>
+        <select id="status" [(ngModel)]="filters.status">
+          <option value="">Todos</option>
+          <option value="PENDING">Pendente</option>
+          <option value="CONFIRMED">Confirmado</option>
+          <option value="IN_PREPARATION">Em preparo</option>
+          <option value="READY">Pronto</option>
+          <option value="DELIVERED">Entregue</option>
+          <option value="REJECTED_OUT_OF_STOCK">Sem estoque</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="tableNumber">Mesa</label>
+        <input id="tableNumber" type="number" min="1" [(ngModel)]="filters.tableNumber" placeholder="Ex: 5" />
+      </div>
+
+      <div class="field">
+        <label for="startDate">Data inicial</label>
+        <input id="startDate" type="date" [(ngModel)]="filters.startDate" />
+      </div>
+
+      <div class="field">
+        <label for="endDate">Data final</label>
+        <input id="endDate" type="date" [(ngModel)]="filters.endDate" />
+      </div>
+    </div>
+
+    <div class="filter-actions">
+      <button class="search-button" type="button" (click)="loadOrders()">
+        Buscar pedidos
+      </button>
+
+      <button class="clear-button" type="button" (click)="clearFilters()">
+        Limpar filtros
+      </button>
+    </div>
+  </section>
+
+  <div class="feedback" *ngIf="loadingOrders">Carregando pedidos...</div>
+
+  <div class="feedback error" *ngIf="!loadingOrders && error">
+    {{ error }}
+  </div>
+
+  <section class="content-grid" *ngIf="!loadingOrders && !error">
+    <div class="orders-panel">
+
+      <div class="orders-list" *ngIf="orders.length > 0; else emptyOrders">
+        <article class="order-summary-card" *ngFor="let order of orders; trackBy: trackByOrderId"
+          (click)="selectOrder(order.id)">
+          <div class="order-summary-top">
+            <div>
+              <h3>Pedido #{{ order.id }}</h3>
+              <p>Mesa {{ order.tableNumber }}</p>
+            </div>
+
+            <span class="status-badge" [ngClass]="getStatusClass(order.status)">
+              {{ getStatusLabel(order.status) }}
+            </span>
+          </div>
+
+          <div class="order-summary-meta">
+            <span>{{ order.itemsCount }} item(ns)</span>
+            <span>Criado em {{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        </article>
+      </div>
+
+      <ng-template #emptyOrders>
+        <div class="empty-state compact">
+          <h3>Nenhum pedido encontrado</h3>
+          <p>Tente ajustar os filtros para localizar os pedidos.</p>
+        </div>
+      </ng-template>
+    </div>
+
+    <div class="details-panel">
+      <div class="feedback" *ngIf="loadingSelectedOrder">Carregando detalhes do pedido...</div>
+
+      <ng-container *ngIf="!loadingSelectedOrder && selectedOrder">
+        <section class="details-card">
+          <div class="details-header">
+            <div>
+              <h2>Pedido #{{ selectedOrder.id }}</h2>
+              <p>Mesa {{ selectedOrder.tableNumber }}</p>
+            </div>
+
+            <span class="status-badge" [ngClass]="getStatusClass(selectedOrder.status)">
+              {{ getStatusLabel(selectedOrder.status) }}
+            </span>
+          </div>
+
+          <div class="details-meta">
+            <span>Criado em {{ selectedOrder.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+            <span>Atualizado em {{ selectedOrder.updatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        </section>
+
+        <section class="details-card">
+          <h2>Itens do pedido</h2>
+
+          <div class="items-list">
+            <article class="item-card" *ngFor="let item of selectedOrder.items">
+              <div class="item-top">
+                <strong>{{ item.menuItem.name }}</strong>
+                <span>{{ formatPrice(item.menuItem.price) }}</span>
+              </div>
+
+              <div class="item-meta">
+                <span>Quantidade: {{ item.quantity }}</span>
+                <span *ngIf="item.notes">Obs: {{ item.notes }}</span>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="details-card">
+          <h2>Histórico</h2>
+
+          <div class="history-list" *ngIf="selectedOrder.history.length > 0; else emptyHistory">
+            <article class="history-card" *ngFor="let entry of selectedOrder.history; trackBy: trackByHistory">
+              <div class="history-top">
+                <div class="history-transition">
+                  <span class="status-badge"
+                    [ngClass]="getStatusClass(entry.fromStatus ?? entry.previousStatus ?? 'PENDING')">
+                    {{ getPreviousStatus(entry) }}
+                  </span>
+
+                  <span class="arrow">→</span>
+
+                  <span class="status-badge" [ngClass]="getStatusClass(entry.toStatus ?? entry.newStatus ?? 'PENDING')">
+                    {{ getCurrentStatus(entry) }}
+                  </span>
+                </div>
+
+                <div class="history-date" *ngIf="getHistoryDate(entry)">
+                  {{ getHistoryDate(entry) | date:'dd/MM/yyyy HH:mm' }}
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <ng-template #emptyHistory>
+            <div class="empty-state compact">
+              <h3>Nenhum histórico encontrado</h3>
+              <p>Esse pedido ainda não possui mudanças registradas.</p>
+            </div>
+          </ng-template>
+        </section>
+      </ng-container>
+
+      <div class="empty-state" *ngIf="!loadingSelectedOrder && !selectedOrder">
+        <h2>Selecione um pedido</h2>
+        <p>Escolha um pedido na lista para visualizar os itens e o histórico completo.</p>
+      </div>
+    </div>
+  </section>
+</div>

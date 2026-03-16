@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  IN_PREPARATION
+  READY
+  DELIVERED
+  REJECTED_OUT_OF_STOCK
+}
+
+model MenuItem {
+  id         Int         @id @default(autoincrement())
+  name       String
+  price      Decimal     @db.Decimal(10, 2)
+  active     Boolean     @default(true)
+  recipes    Recipe[]
+  orderItems OrderItem[]
+
+  @@map("menu_items")
+}
+
+model Ingredient {
+  id      Int      @id @default(autoincrement())
+  name    String
+  unit    String
+  recipes Recipe[]
+  stock   Stock?
+
+  @@map("ingredients")
+}
+
+model Recipe {
+  id               Int @id @default(autoincrement())
+  menuItemId       Int
+  ingredientId     Int
+  quantityRequired Int
+
+  menuItem   MenuItem   @relation(fields: [menuItemId], references: [id])
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id])
+
+  @@map("recipes")
+}
+
+model Stock {
+  id                Int @id @default(autoincrement())
+  ingredientId      Int @unique
+  quantityAvailable Int
+
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id])
+
+  @@map("stock")
+}
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  tableNumber Int
+  status      OrderStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  items   OrderItem[]
+  history OrderHistory[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         Int     @id @default(autoincrement())
+  orderId    Int
+  menuItemId Int
+  quantity   Int
+  notes      String?
+
+  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@map("order_items")
+}
+
+model OrderHistory {
+  id         Int          @id @default(autoincrement())
+  orderId    Int
+  fromStatus OrderStatus?
+  toStatus   OrderStatus
+  createdAt  DateTime     @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("order_history")
+}

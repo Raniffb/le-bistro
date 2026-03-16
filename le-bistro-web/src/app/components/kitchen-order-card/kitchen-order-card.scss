@@ -1,0 +1,134 @@
+.order-card {
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 18px;
+  padding: 20px;
+  border: 1px solid rgba(226, 232, 240, 0.82);
+  box-shadow: 0 14px 30px rgba(2, 8, 23, 0.14);
+  color: #0f172a;
+}
+
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  h2 {
+    margin: 0 0 6px;
+    font-size: 1.2rem;
+    color: #0f172a;
+  }
+}
+
+.table-label {
+  color: #334155;
+  font-weight: 600;
+}
+
+.order-meta {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin-bottom: 16px;
+}
+
+.items-section {
+  h3 {
+    margin: 0 0 12px;
+    font-size: 1rem;
+    color: #334155;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 18px;
+  }
+
+  li {
+    margin-bottom: 10px;
+    line-height: 1.5;
+    color: #475569;
+  }
+
+  strong {
+    color: #0f172a;
+  }
+
+  span {
+    color: #64748b;
+  }
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-confirmed {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-in-preparation {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.status-ready {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status-delivered {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.status-pending {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.status-rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.status-default {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.order-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.action-button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #0f3d2e 0%, #166534 100%);
+  color: #dcfce7;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+  box-shadow: 0 10px 20px rgba(2, 8, 23, 0.14);
+}
+
+.action-button:hover:not(:disabled) {
+  opacity: 0.95;
+}
+
+.action-button:disabled {
+  background: #e2e8f0;
+  color: #64748b;
+  cursor: not-allowed;
+  box-shadow: none;
+}

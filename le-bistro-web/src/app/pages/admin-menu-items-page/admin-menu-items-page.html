@@ -1,0 +1,190 @@
+<div class="admin-menu-items-page">
+  <header class="page-header">
+    <app-back-button></app-back-button>
+
+    <div class="page-title">
+      <h1>Administração do cardápio</h1>
+      <p>Crie pratos e vincule ingredientes à receita de cada item</p>
+    </div>
+  </header>
+
+  <div class="feedback" *ngIf="loading">Carregando itens do cardápio...</div>
+
+  <div class="feedback error" *ngIf="!loading && error">
+    {{ error }}
+  </div>
+
+  <div class="feedback success" *ngIf="!loading && success">
+    {{ success }}
+  </div>
+
+  <section class="content-grid" [class.editing]="isEditing">
+    <section class="form-card" *ngIf="!isEditing">
+      <h2>Novo item</h2>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="field">
+          <label for="name">Nome</label>
+          <input id="name" type="text" formControlName="name" placeholder="Ex: Risoto de Limão Siciliano" />
+        </div>
+
+        <div class="field">
+          <label for="price">Preço</label>
+          <input id="price" type="number" min="0" step="0.01" formControlName="price" />
+        </div>
+
+        <div class="checkbox-field">
+          <input id="active" type="checkbox" formControlName="active" />
+          <label for="active">Item ativo</label>
+        </div>
+
+        <div class="form-actions">
+          <button class="submit-button" type="submit" [disabled]="saving">
+            {{ saving ? 'Salvando...' : 'Criar item' }}
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="list-card">
+      <div class="list-header">
+        <h2>Itens cadastrados</h2>
+      </div>
+
+      <div class="menu-list" *ngIf="menuItems.length > 0; else emptyState">
+        <article class="menu-row" *ngFor="let item of menuItems; trackBy: trackByMenuItemId">
+          <div class="menu-row-main">
+            <strong>{{ item.name }}</strong>
+            <span>{{ formatPrice(item.price) }}</span>
+
+            <div class="recipe-preview" *ngIf="item.ingredients?.length">
+              <small *ngFor="let ingredient of item.ingredients">
+                {{ ingredient.ingredientName }}: {{ ingredient.quantityRequired }} {{ ingredient.unit }}
+              </small>
+            </div>
+
+            <small *ngIf="!item.ingredients?.length">Sem receita cadastrada</small>
+          </div>
+
+          <div class="menu-row-meta">
+            <span class="status-badge" [class.active]="item.active" [class.inactive]="!item.active">
+              {{ item.active ? 'Ativo' : 'Inativo' }}
+            </span>
+
+            <div class="row-actions">
+              <button class="action-button edit" type="button" (click)="startEdit(item)">
+                Editar
+              </button>
+
+              <button class="action-button toggle" type="button" (click)="toggleStatus(item)"
+                [disabled]="updatingStatusId === item.id">
+                {{
+                updatingStatusId === item.id
+                ? 'Atualizando...'
+                : item.active
+                ? 'Inativar'
+                : 'Ativar'
+                }}
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <ng-template #emptyState>
+        <div class="empty-state">
+          <h3>Nenhum item cadastrado</h3>
+          <p>Assim que você criar itens, eles aparecerão aqui.</p>
+        </div>
+      </ng-template>
+    </section>
+  </section>
+
+  <div class="edit-modal-overlay" *ngIf="isEditing" (click)="cancelEdit()">
+    <div class="edit-modal" (click)="$event.stopPropagation()">
+      <div class="edit-modal-header">
+        <div>
+          <h2>Editar item</h2>
+          <p>Atualize os dados do prato e a receita vinculada</p>
+        </div>
+
+        <button class="close-button" type="button" (click)="cancelEdit()">✕</button>
+      </div>
+
+      <div class="edit-modal-body">
+        <section class="modal-section">
+          <h3>Dados do prato</h3>
+
+          <form [formGroup]="form" (ngSubmit)="submit()">
+            <div class="field">
+              <label for="edit-name">Nome</label>
+              <input id="edit-name" type="text" formControlName="name" placeholder="Ex: Risoto de Limão Siciliano" />
+            </div>
+
+            <div class="field">
+              <label for="edit-price">Preço</label>
+              <input id="edit-price" type="number" min="0" step="0.01" formControlName="price" />
+            </div>
+
+            <div class="checkbox-field">
+              <input id="edit-active" type="checkbox" formControlName="active" />
+              <label for="edit-active">Item ativo</label>
+            </div>
+
+            <div class="form-actions">
+              <button class="submit-button" type="submit" [disabled]="saving">
+                {{ saving ? 'Salvando...' : 'Salvar alterações' }}
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <section class="modal-section">
+          <div class="recipe-header">
+            <h3>Receita do prato</h3>
+            <button class="add-button" type="button" (click)="addRecipeIngredient()">
+              Adicionar ingrediente
+            </button>
+          </div>
+
+          <div class="feedback compact" *ngIf="loadingIngredients">
+            Carregando ingredientes...
+          </div>
+
+          <form [formGroup]="recipeForm" (ngSubmit)="saveRecipe()" *ngIf="!loadingIngredients">
+            <div formArrayName="ingredients" class="recipe-list">
+              <div class="recipe-row" *ngFor="let group of recipeIngredientsFormArray.controls; let i = index"
+                [formGroupName]="i">
+                <div class="field">
+                  <label [for]="'ingredientId-' + i">Ingrediente</label>
+                  <select [id]="'ingredientId-' + i" formControlName="ingredientId">
+                    <option [ngValue]="null">Selecione um ingrediente</option>
+                    <option *ngFor="let ingredient of ingredients" [ngValue]="ingredient.id">
+                      {{ ingredient.name }} ({{ ingredient.unit }}) - estoque: {{ ingredient.stockQuantity }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="field quantity-field">
+                  <label [for]="'quantityRequired-' + i">Quantidade necessária</label>
+                  <input [id]="'quantityRequired-' + i" type="number" min="1" formControlName="quantityRequired" />
+                </div>
+
+                <div class="recipe-actions">
+                  <button class="remove-button" type="button" (click)="removeRecipeIngredient(i)"
+                    [disabled]="recipeIngredientsFormArray.length === 1">
+                    Remover
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <button class="save-recipe-button" type="submit" [disabled]="savingRecipe">
+              {{ savingRecipe ? 'Salvando receita...' : 'Salvar receita' }}
+            </button>
+          </form>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>

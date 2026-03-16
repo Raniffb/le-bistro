@@ -1,0 +1,94 @@
+<div class="admin-ingredients-page">
+  <header class="page-header">
+    <app-back-button></app-back-button>
+
+    <div class="page-title">
+      <h1>Administração de ingredientes</h1>
+      <p>Cadastre ingredientes, ajuste unidade e controle o estoque disponível</p>
+    </div>
+  </header>
+
+  <div class="feedback" *ngIf="loading">Carregando ingredientes...</div>
+
+  <div class="feedback error" *ngIf="!loading && error">
+    {{ error }}
+  </div>
+
+  <div class="feedback success" *ngIf="!loading && success">
+    {{ success }}
+  </div>
+
+  <section class="content-grid">
+    <section class="form-card">
+      <h2>{{ isEditing ? 'Editar ingrediente' : 'Novo ingrediente' }}</h2>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="field">
+          <label for="name">Nome</label>
+          <input id="name" type="text" formControlName="name" placeholder="Ex: Arroz Arbóreo" />
+        </div>
+
+        <div class="field">
+          <label for="unit">Unidade</label>
+          <input id="unit" type="text" formControlName="unit" placeholder="Ex: g, ml, unidade, porção" />
+        </div>
+
+        <div class="field">
+          <label for="stockQuantity">Estoque inicial / atual</label>
+          <input id="stockQuantity" type="number" min="0" step="1" formControlName="stockQuantity" />
+        </div>
+
+        <div class="form-actions">
+          <button class="submit-button" type="submit" [disabled]="saving">
+            {{ saving ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Criar ingrediente' }}
+          </button>
+
+          <button *ngIf="isEditing" class="cancel-button" type="button" (click)="cancelEdit()">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="list-card">
+      <div class="list-header">
+        <h2>Ingredientes cadastrados</h2>
+      </div>
+
+      <div class="ingredients-list" *ngIf="ingredients.length > 0; else emptyState">
+        <article class="ingredient-row" *ngFor="let ingredient of ingredients; trackBy: trackByIngredientId">
+          <div class="ingredient-row-main">
+            <strong>{{ ingredient.name }}</strong>
+            <span>Unidade: {{ ingredient.unit }}</span>
+            <small>Estoque atual: {{ ingredient.stockQuantity }}</small>
+          </div>
+
+          <div class="ingredient-row-meta">
+            <div class="stock-actions">
+              <button class="stock-button negative" type="button" (click)="quickUpdateStock(ingredient, -1)"
+                [disabled]="updatingStockId === ingredient.id || ingredient.stockQuantity === 0">
+                -1
+              </button>
+
+              <button class="stock-button positive" type="button" (click)="quickUpdateStock(ingredient, 1)"
+                [disabled]="updatingStockId === ingredient.id">
+                +1
+              </button>
+            </div>
+
+            <button class="action-button edit" type="button" (click)="startEdit(ingredient)">
+              Editar
+            </button>
+          </div>
+        </article>
+      </div>
+
+      <ng-template #emptyState>
+        <div class="empty-state">
+          <h3>Nenhum ingrediente cadastrado</h3>
+          <p>Assim que você criar ingredientes, eles aparecerão aqui.</p>
+        </div>
+      </ng-template>
+    </section>
+  </section>
+</div>

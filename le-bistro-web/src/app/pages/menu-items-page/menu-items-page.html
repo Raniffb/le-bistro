@@ -1,0 +1,44 @@
+<div class="menu-items-page">
+  <header class="page-header">
+    <app-back-button></app-back-button>
+
+    <div class="page-title">
+      <h1>Cardápio</h1>
+      <p>Visualize os itens disponíveis no Le Bistrô</p>
+    </div>
+  </header>
+
+  <div class="page-actions">
+    <button class="refresh-button" type="button" (click)="loadMenuItems()">
+      Atualizar cardápio
+    </button>
+  </div>
+
+  <div class="feedback" *ngIf="loading">Carregando itens do cardápio...</div>
+
+  <div class="feedback error" *ngIf="!loading && error">
+    {{ error }}
+  </div>
+
+  <section class="menu-grid" *ngIf="!loading && !error && menuItems.length > 0">
+    <article class="menu-card" *ngFor="let item of menuItems; trackBy: trackByMenuItemId"
+      (click)="goToNewOrder(item.id)">
+      <div class="menu-card-header">
+        <h2>{{ item.name }}</h2>
+
+        <span class="status-badge" [class.active]="item.active" [class.inactive]="!item.active">
+          {{ item.active ? 'Ativo' : 'Inativo' }}
+        </span>
+      </div>
+
+      <div class="price">
+        {{ formatPrice(item.price) }}
+      </div>
+    </article>
+  </section>
+
+  <div class="empty-state" *ngIf="!loading && !error && menuItems.length === 0">
+    <h2>Nenhum item encontrado</h2>
+    <p>Não há itens cadastrados no cardápio neste momento.</p>
+  </div>
+</div>

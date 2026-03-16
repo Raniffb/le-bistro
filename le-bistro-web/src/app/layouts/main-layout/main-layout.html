@@ -1,0 +1,30 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <h1>Le Bistrô</h1>
+      <p>MVP de operação</p>
+    </div>
+
+    <nav class="nav-links">
+      <a routerLink="/kitchen" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        Cozinha
+      </a>
+
+      <a routerLink="/orders/new" routerLinkActive="active">
+        Novo pedido
+      </a>
+
+      <a routerLink="/orders/history" routerLinkActive="active">
+        Histórico
+      </a>
+
+      <a routerLink="/menu-items" routerLinkActive="active">
+        Cardápio
+      </a>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

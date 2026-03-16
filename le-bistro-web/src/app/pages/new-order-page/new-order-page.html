@@ -1,0 +1,103 @@
+<div class="new-order-page">
+  <header class="page-header">
+    <app-back-button></app-back-button>
+
+    <div class="page-title">
+      <h1>Novo pedido</h1>
+      <p>Monte um pedido e envie para a cozinha</p>
+    </div>
+  </header>
+
+  <div class="page-actions">
+    <button class="refresh-button" type="button" (click)="loadMenuItems()">
+      Atualizar cardápio
+    </button>
+  </div>
+
+  <div class="feedback" *ngIf="loadingMenuItems">Carregando itens do cardápio...</div>
+
+  <div class="feedback error" *ngIf="!loadingMenuItems && error">
+    {{ error }}
+  </div>
+
+  <div class="feedback success" *ngIf="!loadingMenuItems && success">
+    {{ success }}
+  </div>
+
+  <div class="feedback warning" *ngIf="!loadingMenuItems && stockWarningMessage">
+    <strong>{{ stockWarningMessage }}</strong>
+
+    <p *ngIf="rejectedOrderId !== null">
+      Pedido #{{ rejectedOrderId }} não pode ser preparado no momento.
+    </p>
+
+    <ul *ngIf="stockWarningDetails.length > 0">
+      <li *ngFor="let detail of stockWarningDetails">
+        {{ detail }}
+      </li>
+    </ul>
+  </div>
+
+  <form class="order-form" [formGroup]="form" (ngSubmit)="submitOrder()">
+    <section class="form-card">
+      <h2>Informações do pedido</h2>
+
+      <div class="field">
+        <label for="tableNumber">Número da mesa</label>
+        <input id="tableNumber" type="number" formControlName="tableNumber" min="1" />
+
+        <small class="field-error" *ngIf="
+            form.get('tableNumber')?.invalid &&
+            form.get('tableNumber')?.touched
+          ">
+          Informe um número de mesa válido.
+        </small>
+      </div>
+    </section>
+
+    <section class="form-card" formArrayName="items">
+      <div class="section-header">
+        <h2>Itens do pedido</h2>
+
+        <button class="secondary-button" type="button" (click)="addItem()">
+          Adicionar item
+        </button>
+      </div>
+
+      <div class="order-item" *ngFor="let itemGroup of itemsFormArray.controls; let i = index" [formGroupName]="i">
+        <div class="field">
+          <label [for]="'menuItemId-' + i">Item do cardápio</label>
+          <select [id]="'menuItemId-' + i" formControlName="menuItemId">
+            <option [ngValue]="null">Selecione um item</option>
+            <option *ngFor="let item of activeMenuItems" [ngValue]="item.id">
+              {{ item.name }} - {{ item.price }}
+            </option>
+          </select>
+        </div>
+
+        <div class="field quantity-field">
+          <label [for]="'quantity-' + i">Quantidade</label>
+          <input [id]="'quantity-' + i" type="number" formControlName="quantity" min="1" />
+        </div>
+
+        <div class="field notes-field">
+          <label [for]="'notes-' + i">Observações</label>
+          <input [id]="'notes-' + i" type="text" formControlName="notes"
+            placeholder="Sem cebola, ponto da carne, etc." />
+        </div>
+
+        <div class="item-actions">
+          <button class="remove-button" type="button" (click)="removeItem(i)" [disabled]="itemsFormArray.length === 1">
+            Remover
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <div class="submit-row">
+      <button class="submit-button" type="submit" [disabled]="saving || loadingMenuItems">
+        {{ saving ? 'Salvando...' : 'Criar pedido' }}
+      </button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,45 @@
+<div class="home-menu-page">
+  <section class="hero-section">
+    <div class="hero-content">
+      <span class="eyebrow">Sistema interno</span>
+      <h1>Le Bistrô</h1>
+      <p>
+        Escolha uma opção para continuar e navegue pelo MVP de pedidos,
+        cozinha, histórico e cardápio.
+      </p>
+    </div>
+
+    <div class="hero-panel">
+      <div class="hero-panel-card">
+        <span class="panel-label">Ambiente</span>
+        <strong>Operação do restaurante</strong>
+        <p>Pedidos, cozinha e acompanhamento em uma navegação simples.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="menu-section">
+    <div class="section-header">
+      <h2>Acesso rápido</h2>
+      <p>Selecione a área que deseja utilizar.</p>
+    </div>
+
+    <div class="options-grid">
+      <a class="option-card" *ngFor="let option of options" [routerLink]="option.route" [ngClass]="option.accentClass">
+        <div class="option-top">
+          <span class="option-icon">{{ option.icon }}</span>
+          <span class="option-arrow">→</span>
+        </div>
+
+        <div class="option-body">
+          <h3>{{ option.title }}</h3>
+          <p>{{ option.description }}</p>
+        </div>
+
+        <div class="option-footer">
+          <span>Acessar módulo</span>
+        </div>
+      </a>
+    </div>
+  </section>
+</div>

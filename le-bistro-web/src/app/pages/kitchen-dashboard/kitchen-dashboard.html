@@ -1,0 +1,70 @@
+<div class="kitchen-dashboard">
+  <header class="page-header">
+    <app-back-button></app-back-button>
+
+    <div class="dashboard-header">
+      <div>
+        <h1>Dashboard da Cozinha</h1>
+        <p>Acompanhe os pedidos confirmados, em preparo e prontos</p>
+      </div>
+    </div>
+  </header>
+
+  <section class="summary-grid" *ngIf="!loading">
+    <article class="summary-card summary-confirmed">
+      <span class="summary-label">Confirmados</span>
+      <strong class="summary-value">{{ summary.confirmed }}</strong>
+    </article>
+
+    <article class="summary-card summary-in-preparation">
+      <span class="summary-label">Em preparo</span>
+      <strong class="summary-value">{{ summary.inPreparation }}</strong>
+    </article>
+
+    <article class="summary-card summary-ready">
+      <span class="summary-label">Prontos</span>
+      <strong class="summary-value">{{ summary.ready }}</strong>
+    </article>
+  </section>
+
+  <section class="filters-bar" *ngIf="!loading && !error && orders.length > 0">
+    <button class="filter-button" [class.active]="isActiveFilter('ALL')" (click)="setStatusFilter('ALL')">
+      Todos
+    </button>
+
+    <button class="filter-button" [class.active]="isActiveFilter('CONFIRMED')" (click)="setStatusFilter('CONFIRMED')">
+      Confirmados
+    </button>
+
+    <button class="filter-button" [class.active]="isActiveFilter('IN_PREPARATION')"
+      (click)="setStatusFilter('IN_PREPARATION')">
+      Em preparo
+    </button>
+
+    <button class="filter-button" [class.active]="isActiveFilter('READY')" (click)="setStatusFilter('READY')">
+      Prontos
+    </button>
+  </section>
+
+  <div class="feedback" *ngIf="loading">Carregando pedidos...</div>
+
+  <div class="feedback error" *ngIf="!loading && error">
+    {{ error }}
+  </div>
+
+  <section class="orders-grid" *ngIf="!loading && !error && filteredOrders.length > 0">
+    <app-kitchen-order-card *ngFor="let order of filteredOrders; trackBy: trackByOrderId" [order]="order"
+      [isUpdating]="updatingOrderId === order.id"
+      (advanceStatus)="handleAdvanceStatus($event)"></app-kitchen-order-card>
+  </section>
+
+  <div class="empty-state" *ngIf="!loading && !error && orders.length === 0">
+    <h2>Nenhum pedido na cozinha</h2>
+    <p>Assim que novos pedidos entrarem, eles aparecerão aqui.</p>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && !error && orders.length > 0 && filteredOrders.length === 0">
+    <h2>Nenhum pedido encontrado</h2>
+    <p>Não há pedidos para o filtro selecionado.</p>
+  </div>
+</div>
